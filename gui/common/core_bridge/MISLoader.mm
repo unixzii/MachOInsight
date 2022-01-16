@@ -1,0 +1,40 @@
+#include <memory>
+
+#include "core/loader.h"
+
+#import "MISLoader.h"
+#import "MISMachOBinary.h"
+
+using namespace macho_insight;
+
+@implementation MISLoader {
+    std::shared_ptr<Loader> _cxxLoader;
+}
+
+- (instancetype)initWithExecutablePath:(NSString *)path {
+    self = [super init];
+    if (self) {
+        auto cxxLoader = new Loader(std::string(path.UTF8String));
+        _cxxLoader.reset(cxxLoader);
+    }
+    return self;
+}
+
+- (BOOL)tryLoad {
+    return _cxxLoader->TryLoad();
+}
+
+- (NSUInteger)numberOfArchs {
+    return _cxxLoader->ArchCount();
+}
+
+- (NSInteger)archTypeAtIndex:(NSUInteger)index {
+    return (NSInteger) _cxxLoader->ArchTypeAt(index);
+}
+
+- (id)machOBinaryAtIndex:(NSUInteger)index {
+    auto cxxBinary = _cxxLoader->MachOBinaryAt(index);
+    return [[MISMachOBinary alloc] initWithParentLoader:self cxxObject:cxxBinary];
+}
+
+@end

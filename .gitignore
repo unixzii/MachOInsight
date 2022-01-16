@@ -1,0 +1,12 @@
+# macOS stuff
+.DS_Store
+
+# VSCode stuff
+.vscode
+
+# Bazel stuff
+bazel-*
+
+# Tulsi stuff
+*.tulsiproj
+*.xcodeproj
