@@ -3,55 +3,14 @@
 
 #include "core/base/addr_space.h"
 #include "core/platform/byte_order.h"
+#include "core/macho/macho_data_types.h"
 #include "core/utils/logger.h"
 
 #include "core/macho/fat_binary.h"
 
 namespace {
 
-using namespace macho_insight;
-
-constexpr static uint32_t MH_MAGIC_64 = 0xfeedfacf;
-constexpr static uint32_t MH_CIGAM_64 = platform::SwapConst(MH_MAGIC_64);
-
-struct mach_header_64 {
-  uint32_t magic;       /* mach magic number identifier */
-  uint32_t cputype;     /* cpu specifier */
-  uint32_t cpusubtype;  /* machine specifier */
-  uint32_t filetype;    /* type of file */
-  uint32_t ncmds;       /* number of load commands */
-  uint32_t sizeofcmds;  /* the size of all the load commands */
-  uint32_t flags;       /* flags */
-  uint32_t reserved;    /* reserved */
-};
-
-constexpr static uint32_t LC_LOAD_DYLIB = 0xc;
-
-union lc_str {
-  uint32_t offset;  /* offset to the string */
-#ifndef __LP64__
-  char* ptr;        /* pointer to the string */
-#endif
-};
-
-struct dylib {
-  union lc_str  name;              /* library's path name */
-  uint32_t timestamp;              /* library's build time stamp */
-  uint32_t current_version;        /* library's current version number */
-  uint32_t compatibility_version;  /* library's compatibility vers number*/
-};
-
-struct load_command {
-  uint32_t cmd;      /* type of load command */
-  uint32_t cmdsize;  /* total size of command in bytes */
-};
-
-struct dylib_command {
-  uint32_t cmd;        /* LC_ID_DYLIB, LC_LOAD_{,WEAK_}DYLIB,
-                          LC_REEXPORT_DYLIB */
-  uint32_t cmdsize;    /* includes pathname string */
-  struct dylib dylib;  /* the library identification */
-};
+using namespace macho_insight::macho;
 
 namespace detail {
 
@@ -103,6 +62,7 @@ private:
 }  // detail namespace
 
 using LoadDylibLoadCommandParser = detail::LoadCommandParser<dylib_command, LC_LOAD_DYLIB>;
+using SegmentLoadCommandParser = detail::LoadCommandParser<segment_command_64, LC_SEGMENT_64>;
 
 }  // anonymous namespace
 
@@ -121,6 +81,21 @@ bool MachOBinary::IsValid() const {
 size_t MachOBinary::LoadDylibCount() {
   ParseLoadCommands();
   return load_dylibs_.size();
+}
+
+const LoadDylib& MachOBinary::LoadDylibAt(size_t idx) {
+  ParseLoadCommands();
+  return load_dylibs_[idx];
+}
+
+size_t MachOBinary::SegmentCount() {
+  ParseLoadCommands();
+  return segments_.size();
+}
+
+const Segment& MachOBinary::SegmentAt(size_t idx) {
+  ParseLoadCommands();
+  return segments_[idx];
 }
 
 void MachOBinary::ParseLoadCommands() {
@@ -153,7 +128,7 @@ void MachOBinary::ParseLoadCommands() {
   detail::LoadCommandParsingContext parsing_context;
   // Register parsers.
   parsing_context.RegisterParser(LoadDylibLoadCommandParser([this](dylib_command* lc) {
-    std::string name = ((char*) lc) + lc->dylib.name.offset;
+    std::string name = ((const char*) lc) + lc->dylib.name.offset;
     
     // Append to the load dylib list (via an in-place fashion).
     this->load_dylibs_.emplace_back();
@@ -161,6 +136,9 @@ void MachOBinary::ParseLoadCommands() {
     ent.name_ = std::move(name);
     ent.current_version_ = lc->dylib.current_version;
     ent.compatibility_version_ = lc->dylib.compatibility_version;
+  }));
+  parsing_context.RegisterParser(SegmentLoadCommandParser([this](segment_command_64* lc) {
+    this->segments_.emplace_back(base::AddressSpace(lc));
   }));
   
   auto header = base_.As<mach_header_64>();

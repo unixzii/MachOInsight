@@ -7,6 +7,7 @@
 #include "core/base/object.h"
 #include "core/base/addr_space.h"
 #include "core/macho/obj_types.h"
+#include "core/macho/segment.h"
 
 namespace macho_insight {
 namespace macho {
@@ -26,6 +27,10 @@ class MachOBinary : public base::Object {
   bool IsValid() const;
   
   size_t LoadDylibCount();
+  const LoadDylib& LoadDylibAt(size_t idx);
+  
+  size_t SegmentCount();
+  const Segment& SegmentAt(size_t idx);
 
  private:
   void ParseLoadCommands();
@@ -34,6 +39,7 @@ class MachOBinary : public base::Object {
   bool lc_parsed_ = false;
   
   std::vector<LoadDylib> load_dylibs_;
+  std::vector<Segment> segments_;
 };
 
 }  // macho namespace
