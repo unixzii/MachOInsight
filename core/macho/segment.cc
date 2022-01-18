@@ -8,6 +8,9 @@ namespace macho {
 Segment::Segment(base::AddressSpace lc_base) {
   auto lc = lc_base.As<segment_command_64>();
   name_ = (const char*) lc->segname;
+  vm_addr_ = lc->vmaddr;
+  vm_size_ = lc->vmsize;
+  file_offset_ = lc->fileoff;
   
   auto cur_section = lc_base.Skip(sizeof(segment_command_64));
   for (uint32_t i = 0; i < lc->nsects; ++i) {

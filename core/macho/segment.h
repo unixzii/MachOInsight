@@ -47,9 +47,24 @@ class Segment : public base::Object {
     return sections_[idx];
   }
 
+  uintptr_t vm_addr() const {
+    return vm_addr_;
+  }
+
+  size_t vm_size() const {
+    return vm_size_;
+  }
+
+  size_t file_offset() const {
+    return file_offset_;
+  }
+
  private:
   std::string name_;
   std::vector<Section> sections_;
+  uintptr_t vm_addr_;
+  size_t vm_size_;
+  size_t file_offset_;
 };
 
 }  // macho namespace

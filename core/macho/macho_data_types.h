@@ -22,6 +22,8 @@ struct mach_header_64 {
 constexpr static uint32_t LC_LOAD_DYLIB = 0xc;
 constexpr static uint32_t LC_SEGMENT_64 = 0x19;
 
+constexpr static uint32_t LC_DYLD_CHAINED_FIXUPS = 0x80000034;
+
 union lc_str {
   uint32_t offset;  /* offset to the string */
 #ifndef __LP64__
@@ -75,6 +77,51 @@ struct section_64 { /* for 64-bit architectures */
   uint32_t reserved1;  /* reserved (for offset or index) */
   uint32_t reserved2;  /* reserved (for count or sizeof) */
   uint32_t reserved3;  /* reserved */
+};
+
+struct linkedit_data_command {
+  uint32_t cmd;       /* LC_CODE_SIGNATURE, LC_SEGMENT_SPLIT_INFO,
+                         LC_FUNCTION_STARTS, LC_DATA_IN_CODE,
+                         LC_DYLIB_CODE_SIGN_DRS,
+                         LC_LINKER_OPTIMIZATION_HINT,
+                         LC_DYLD_EXPORTS_TRIE, or
+                         LC_DYLD_CHAINED_FIXUPS. */
+  uint32_t cmdsize;   /* sizeof(struct linkedit_data_command) */
+  uint32_t dataoff;   /* file offset of data in __LINKEDIT segment */
+  uint32_t datasize;  /* file size of data in __LINKEDIT segment  */
+};
+
+struct dyld_chained_fixups_header {
+  uint32_t fixups_version;  // 0
+  uint32_t starts_offset;   // offset of dyld_chained_starts_in_image in chain_data
+  uint32_t imports_offset;  // offset of imports table in chain_data
+  uint32_t symbols_offset;  // offset of symbol strings in chain_data
+  uint32_t imports_count;   // number of imported symbol names
+  uint32_t imports_format;  // DYLD_CHAINED_IMPORT*
+  uint32_t symbols_format;  // 0 => uncompressed, 1 => zlib compressed
+};
+
+struct dyld_chained_starts_in_image {
+  uint32_t seg_count;
+  uint32_t seg_info_offset[1];  // each entry is offset into this struct for that segment
+                                // followed by pool of dyld_chain_starts_in_segment data
+};
+
+struct dyld_chained_starts_in_segment {
+  uint32_t size;               // size of this (amount kernel needs to copy)
+  uint16_t page_size;          // 0x1000 or 0x4000
+  uint16_t pointer_format;     // DYLD_CHAINED_PTR_*
+  uint64_t segment_offset;     // offset in memory to start of segment
+  uint32_t max_valid_pointer;  // for 32-bit OS, any value beyond this is not a pointer
+  uint16_t page_count;         // how many pages are in array
+  uint16_t page_start[1];      // each entry is offset in each page of first element in chain
+                               // or DYLD_CHAINED_PTR_START_NONE if no fixups on page
+};
+
+enum {
+  DYLD_CHAINED_PTR_START_NONE   = 0xFFFF, // used in page_start[] to denote a page with no fixups
+  DYLD_CHAINED_PTR_START_MULTI  = 0x8000, // used in page_start[] to denote a page which has multiple starts
+  DYLD_CHAINED_PTR_START_LAST   = 0x8000, // used in chain_starts[] to denote last start in list for page
 };
 
 }  // macho namespace

@@ -4,6 +4,7 @@
 #include "core/base/addr_space.h"
 #include "core/platform/byte_order.h"
 #include "core/macho/macho_data_types.h"
+#include "core/macho/chained_fixups.h"
 #include "core/utils/logger.h"
 
 #include "core/macho/fat_binary.h"
@@ -63,6 +64,7 @@ private:
 
 using LoadDylibLoadCommandParser = detail::LoadCommandParser<dylib_command, LC_LOAD_DYLIB>;
 using SegmentLoadCommandParser = detail::LoadCommandParser<segment_command_64, LC_SEGMENT_64>;
+using ChainedFixupsLoadCommandParser = detail::LoadCommandParser<linkedit_data_command, LC_DYLD_CHAINED_FIXUPS>;
 
 }  // anonymous namespace
 
@@ -99,9 +101,15 @@ const Segment& MachOBinary::SegmentAt(size_t idx) {
 }
 
 void MachOBinary::ParseLoadCommands() {
-  if (lc_parsed_) {
+  if (lc_parsed_ || lc_partially_parsed_allowed_) {
     return;
   }
+  
+  if (lc_parsing_) {
+    CHECK(false) << "Recursive parsing occurred, this is a bug in program";
+    return;
+  }
+  lc_parsing_ = true;
   
   struct ParsingDriver {
     ParsingDriver(
@@ -140,6 +148,16 @@ void MachOBinary::ParseLoadCommands() {
   parsing_context.RegisterParser(SegmentLoadCommandParser([this](segment_command_64* lc) {
     this->segments_.emplace_back(base::AddressSpace(lc));
   }));
+  parsing_context.RegisterParser(ChainedFixupsLoadCommandParser([this](linkedit_data_command* lc) {
+    this->use_chained_fixups_ = true;
+    
+    // Hand off parsing works to the helper.
+    ChainedFixupsHelper helper(*this, base::AddressSpace(lc));
+    this->lc_partially_parsed_allowed_ = true;  // Hacks: load commands are being parsed, we temporarily
+                                                // allow accessing the data depending on them (which is
+    helper.Parse();                             // safe here).
+    this->lc_partially_parsed_allowed_ = false;
+  }));
   
   auto header = base_.As<mach_header_64>();
   ParsingDriver parsing_driver(base_.Skip(sizeof(mach_header_64)),
@@ -148,6 +166,7 @@ void MachOBinary::ParseLoadCommands() {
   // Start parsing!
   parsing_driver.Run();
   lc_parsed_ = true;
+  lc_parsing_ = false;
 }
 
 }  // macho namespace

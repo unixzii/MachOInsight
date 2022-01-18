@@ -33,10 +33,18 @@ class MachOBinary : public base::Object {
   const Segment& SegmentAt(size_t idx);
 
  private:
+  friend class ChainedFixupsHelper;
+
   void ParseLoadCommands();
   
   base::AddressSpace base_;
-  bool lc_parsed_ = false;
+  
+  // Load command parsing state:
+  bool lc_parsed_ : 1 = false;
+  bool lc_parsing_ : 1 = false;
+  bool lc_partially_parsed_allowed_ : 1 = false;
+  
+  bool use_chained_fixups_ : 1 = false;
   
   std::vector<LoadDylib> load_dylibs_;
   std::vector<Segment> segments_;
