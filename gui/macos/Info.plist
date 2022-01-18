@@ -26,5 +26,38 @@
 	<string>Main</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.unix-executable</string>
+			</array>
+			<key>NSDocumentClass</key>
+			<string>MachOInsightMain.Document</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.apple.mach-o-dylib</string>
+			</array>
+			<key>NSDocumentClass</key>
+			<string>MachOInsightMain.Document</string>
+		</dict>
+        <dict>
+            <key>CFBundleTypeRole</key>
+            <string>Viewer</string>
+            <key>LSItemContentTypes</key>
+            <array>
+                <string>public.data</string>
+            </array>
+            <key>NSDocumentClass</key>
+            <string>MachOInsightMain.Document</string>
+        </dict>
+	</array>
 </dict>
 </plist>
