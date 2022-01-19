@@ -11,18 +11,18 @@ Segment::Segment(base::AddressSpace lc_base) {
   vm_addr_ = lc->vmaddr;
   vm_size_ = lc->vmsize;
   file_offset_ = lc->fileoff;
-  
+
   auto cur_section = lc_base.Skip(sizeof(segment_command_64));
   for (uint32_t i = 0; i < lc->nsects; ++i) {
     auto sect = cur_section.As<section_64>();
-    
+
     sections_.emplace_back(Section());
     Section& section = sections_.back();
     section.name_ = (const char*) sect->sectname;
     section.vm_addr_ = sect->addr;
     section.vm_size_ = sect->size;
     section.file_offset_ = sect->offset;
-    
+
     cur_section = cur_section.Skip(sizeof(section_64));
   }
 }

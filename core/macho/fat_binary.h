@@ -1,9 +1,9 @@
 #pragma once
 
-#include "core/base/object.h"
 #include "core/base/addr_space.h"
-#include "core/macho/obj_types.h"
+#include "core/base/object.h"
 #include "core/macho/macho_binary.h"
+#include "core/macho/obj_types.h"
 
 namespace macho_insight {
 namespace macho {
@@ -21,7 +21,7 @@ class FatBinary : public base::Object {
   FatBinary(base::AddressSpace base) : base_(base) { }
 
   bool IsValid() const;
-  
+
   size_t ArchCount() const;
   ArchType ArchTypeAt(size_t idx) const;
   MachOBinary* MachOBinaryAt(size_t idx) const;

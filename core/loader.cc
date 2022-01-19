@@ -1,7 +1,7 @@
 #include "core/loader.h"
+#include "core/macho/fat_binary.h"
 #include "core/platform/mapped_file.h"
 #include "core/utils/logger.h"
-#include "core/macho/fat_binary.h"
 
 namespace macho_insight {
 
@@ -15,7 +15,8 @@ bool Loader::TryLoad() {
     return false;
   }
 
-  auto mapped_file = std::shared_ptr<platform::MappedFile>(platform::MappedFile::Create(path_));
+  auto mapped_file = std::shared_ptr<platform::MappedFile>(
+      platform::MappedFile::Create(path_));
   if (!mapped_file) {
     LOG(ERROR) << "Failed to load, cannot create mapped file";
     return false;
@@ -27,8 +28,9 @@ bool Loader::TryLoad() {
     LOG(INFO) << "Not a fat binary";
     return false;
   }
-  
-  LOG(INFO) << "Fat binary loaded, with " << maybe_fat_binary->ArchCount() << " arch(s)";
+
+  LOG(INFO) << "Fat binary loaded, with " << maybe_fat_binary->ArchCount()
+            << " arch(s)";
 
   mapped_file_ = mapped_file;
   fat_binary_ = maybe_fat_binary;

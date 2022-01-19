@@ -1,11 +1,11 @@
 #pragma once
 
 #include <memory>
-#include <vector>
 #include <string>
+#include <vector>
 
-#include "core/base/object.h"
 #include "core/base/addr_space.h"
+#include "core/base/object.h"
 #include "core/macho/obj_types.h"
 #include "core/macho/segment.h"
 
@@ -25,10 +25,10 @@ class MachOBinary : public base::Object {
   MachOBinary(base::AddressSpace base) : base_(base) { }
 
   bool IsValid() const;
-  
+
   size_t LoadDylibCount();
   const LoadDylib& LoadDylibAt(size_t idx);
-  
+
   size_t SegmentCount();
   const Segment& SegmentAt(size_t idx);
 
@@ -36,16 +36,16 @@ class MachOBinary : public base::Object {
   friend class ChainedFixupsHelper;
 
   void ParseLoadCommands();
-  
+
   base::AddressSpace base_;
-  
+
   // Load command parsing state:
   bool lc_parsed_ : 1 = false;
   bool lc_parsing_ : 1 = false;
   bool lc_partially_parsed_allowed_ : 1 = false;
-  
+
   bool use_chained_fixups_ : 1 = false;
-  
+
   std::vector<LoadDylib> load_dylibs_;
   std::vector<Segment> segments_;
 };

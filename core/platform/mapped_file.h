@@ -12,17 +12,14 @@ class MappedFile final {
   static MappedFile* Create(const std::string& path);
 
   ~MappedFile();
-  
+
   MappedFile() = delete;
   MappedFile(const MappedFile& o) = delete;
 
-  base::AddressSpace Start() const {
-    return base::AddressSpace(buf_);
-  }
+  base::AddressSpace Start() const { return base::AddressSpace(buf_); }
 
  private:
-  MappedFile(void* buf, int fd, size_t len)
-    : buf_(buf), fd_(fd), len_(len) { }
+  MappedFile(void* buf, int fd, size_t len) : buf_(buf), fd_(fd), len_(len) { }
 
   void* buf_;
   int fd_ = -1;

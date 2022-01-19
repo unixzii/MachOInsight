@@ -13,25 +13,27 @@ constexpr static uint32_t FAT_MAGIC = 0xcafebabe;
 constexpr static uint32_t FAT_CIGAM = platform::SwapConst(FAT_MAGIC);
 
 struct fat_header {
-  uint32_t magic;      /* FAT_MAGIC */
-  uint32_t nfat_arch;  /* number of structs that follow */
+  uint32_t magic;     /* FAT_MAGIC */
+  uint32_t nfat_arch; /* number of structs that follow */
 };
 
-constexpr static uint32_t CPU_ARCH_MASK     = 0xff000000;  /* mask for architecture bits */
-constexpr static uint32_t CPU_ARCH_ABI64    = 0x01000000;  /* 64 bit ABI */
-constexpr static uint32_t CPU_ARCH_ABI64_32 = 0x02000000;  /* ABI for 64-bit hardware with 32-bit types; LP32 */
+constexpr static uint32_t CPU_ARCH_MASK =
+    0xff000000; /* mask for architecture bits */
+constexpr static uint32_t CPU_ARCH_ABI64 = 0x01000000; /* 64 bit ABI */
+constexpr static uint32_t CPU_ARCH_ABI64_32 =
+    0x02000000; /* ABI for 64-bit hardware with 32-bit types; LP32 */
 
-constexpr static uint32_t CPU_TYPE_X86    = ((uint32_t) 7);
+constexpr static uint32_t CPU_TYPE_X86 = ((uint32_t) 7);
 constexpr static uint32_t CPU_TYPE_X86_64 = (CPU_TYPE_X86 | CPU_ARCH_ABI64);
-constexpr static uint32_t CPU_TYPE_ARM    = ((uint32_t) 12);
-constexpr static uint32_t CPU_TYPE_ARM64  = (CPU_TYPE_ARM | CPU_ARCH_ABI64);
+constexpr static uint32_t CPU_TYPE_ARM = ((uint32_t) 12);
+constexpr static uint32_t CPU_TYPE_ARM64 = (CPU_TYPE_ARM | CPU_ARCH_ABI64);
 
 struct fat_arch {
-  uint32_t cputype;     /* cpu specifier (int) */
-  uint32_t cpusubtype;  /* machine specifier (int) */
-  uint32_t offset;      /* file offset to this object file */
-  uint32_t size;        /* size of this object file */
-  uint32_t align;       /* alignment as a power of 2 */
+  uint32_t cputype;    /* cpu specifier (int) */
+  uint32_t cpusubtype; /* machine specifier (int) */
+  uint32_t offset;     /* file offset to this object file */
+  uint32_t size;       /* size of this object file */
+  uint32_t align;      /* alignment as a power of 2 */
 };
 
 }  // anonymous namespace
@@ -55,7 +57,7 @@ size_t FatBinary::ArchCount() const {
 
 ArchType FatBinary::ArchTypeAt(size_t idx) const {
   ArchType type = ArchType::Unknown;
-  
+
   // Seek to the required arch segment.
   auto arch_start = base_.Skip(sizeof(fat_header)).Skip(sizeof(fat_arch) * idx);
   auto arch = arch_start.As<fat_arch>();
@@ -76,12 +78,12 @@ MachOBinary* FatBinary::MachOBinaryAt(size_t idx) const {
   auto arch_start = base_.Skip(sizeof(fat_header)).Skip(sizeof(fat_arch) * idx);
   auto arch = arch_start.As<fat_arch>();
   auto offset = platform::SwapBigToHostConst(arch->offset);
-  
+
   std::unique_ptr<MachOBinary> sub_binary(new MachOBinary(base_.Skip(offset)));
   if (!sub_binary->IsValid()) {
     return nullptr;
   }
-  
+
   // Handle off the memory management to caller.
   return sub_binary.release();
 }

@@ -10,13 +10,13 @@ class MachOBinary;
 class ChainedFixupsHelper {
  public:
   ChainedFixupsHelper(MachOBinary& image, base::AddressSpace lc_base)
-    : image_(image), lc_base_(lc_base) { }
+      : image_(image), lc_base_(lc_base) { }
 
   void Parse();
 
  private:
-//  base::AddressSpace GetLinkeditSegment() const;
-  
+  //  base::AddressSpace GetLinkeditSegment() const;
+
   void ParseFixup(base::AddressSpace fixup_loc);
 
   MachOBinary& image_;

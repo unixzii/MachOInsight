@@ -2,9 +2,9 @@
 #include <vector>
 
 #include "core/base/addr_space.h"
-#include "core/platform/byte_order.h"
-#include "core/macho/macho_data_types.h"
 #include "core/macho/chained_fixups.h"
+#include "core/macho/macho_data_types.h"
+#include "core/platform/byte_order.h"
 #include "core/utils/logger.h"
 
 #include "core/macho/fat_binary.h"
@@ -15,29 +15,27 @@ using namespace macho_insight::macho;
 
 namespace detail {
 
-template<typename Layout, uint32_t Cmd>
+template <typename Layout, uint32_t Cmd>
 struct LoadCommandParser {
   using ParserFunc = std::function<void(Layout*)>;
-  
+
   LoadCommandParser(ParserFunc&& parser) : parser_(parser) { }
-  
-  bool Is(load_command* lc) const {
-    return lc->cmd == Cmd;
-  }
-  
+
+  bool Is(load_command* lc) const { return lc->cmd == Cmd; }
+
   void Parse(load_command* lc) const {
     CHECK(Is(lc)) << "Wrong input command type";
     if (parser_) {
       parser_(reinterpret_cast<Layout*>(lc));
     }
   }
-  
-private:
+
+ private:
   ParserFunc parser_;
 };
 
 struct LoadCommandParsingContext {
-  template<typename Parser>
+  template <typename Parser>
   void RegisterParser(Parser&& parser) {
     parsers_.push_back([parser = std::move(parser)](load_command* lc) {
       if (!parser.Is(lc)) {
@@ -47,7 +45,7 @@ struct LoadCommandParsingContext {
       return true;
     });
   }
-  
+
   void Parse(load_command* lc) {
     for (auto& parser : parsers_) {
       if (parser(lc)) {
@@ -55,16 +53,19 @@ struct LoadCommandParsingContext {
       }
     }
   }
-  
-private:
+
+ private:
   std::vector<std::function<bool(load_command*)>> parsers_;
 };
 
 }  // detail namespace
 
-using LoadDylibLoadCommandParser = detail::LoadCommandParser<dylib_command, LC_LOAD_DYLIB>;
-using SegmentLoadCommandParser = detail::LoadCommandParser<segment_command_64, LC_SEGMENT_64>;
-using ChainedFixupsLoadCommandParser = detail::LoadCommandParser<linkedit_data_command, LC_DYLD_CHAINED_FIXUPS>;
+using LoadDylibLoadCommandParser =
+    detail::LoadCommandParser<dylib_command, LC_LOAD_DYLIB>;
+using SegmentLoadCommandParser =
+    detail::LoadCommandParser<segment_command_64, LC_SEGMENT_64>;
+using ChainedFixupsLoadCommandParser =
+    detail::LoadCommandParser<linkedit_data_command, LC_DYLD_CHAINED_FIXUPS>;
 
 }  // anonymous namespace
 
@@ -104,20 +105,19 @@ void MachOBinary::ParseLoadCommands() {
   if (lc_parsed_ || lc_partially_parsed_allowed_) {
     return;
   }
-  
+
   if (lc_parsing_) {
     CHECK(false) << "Recursive parsing occurred, this is a bug in program";
     return;
   }
   lc_parsing_ = true;
-  
+
   struct ParsingDriver {
-    ParsingDriver(
-      base::AddressSpace base,
-      size_t count,
-      detail::LoadCommandParsingContext& ctx
-   ) : cur_(base), count_(count), ctx_(ctx) { }
-    
+    ParsingDriver(base::AddressSpace base,
+                  size_t count,
+                  detail::LoadCommandParsingContext& ctx)
+        : cur_(base), count_(count), ctx_(ctx) { }
+
     void Run() {
       for (size_t i = 0; i < count_; ++i) {
         auto lc = cur_.As<load_command>();
@@ -126,43 +126,47 @@ void MachOBinary::ParseLoadCommands() {
         cur_ = cur_.Skip(lc->cmdsize);
       }
     }
-    
+
    private:
     base::AddressSpace cur_;
     size_t count_;
     detail::LoadCommandParsingContext& ctx_;
   };
-  
+
   detail::LoadCommandParsingContext parsing_context;
   // Register parsers.
-  parsing_context.RegisterParser(LoadDylibLoadCommandParser([this](dylib_command* lc) {
-    std::string name = ((const char*) lc) + lc->dylib.name.offset;
-    
-    // Append to the load dylib list (via an in-place fashion).
-    this->load_dylibs_.emplace_back();
-    LoadDylib& ent = this->load_dylibs_.back();
-    ent.name_ = std::move(name);
-    ent.current_version_ = lc->dylib.current_version;
-    ent.compatibility_version_ = lc->dylib.compatibility_version;
-  }));
-  parsing_context.RegisterParser(SegmentLoadCommandParser([this](segment_command_64* lc) {
-    this->segments_.emplace_back(base::AddressSpace(lc));
-  }));
-  parsing_context.RegisterParser(ChainedFixupsLoadCommandParser([this](linkedit_data_command* lc) {
-    this->use_chained_fixups_ = true;
-    
-    // Hand off parsing works to the helper.
-    ChainedFixupsHelper helper(*this, base::AddressSpace(lc));
-    this->lc_partially_parsed_allowed_ = true;  // Hacks: load commands are being parsed, we temporarily
-                                                // allow accessing the data depending on them (which is
-    helper.Parse();                             // safe here).
-    this->lc_partially_parsed_allowed_ = false;
-  }));
-  
+  parsing_context.RegisterParser(
+      LoadDylibLoadCommandParser([this](dylib_command* lc) {
+        std::string name = ((const char*) lc) + lc->dylib.name.offset;
+
+        // Append to the load dylib list (via an in-place fashion).
+        this->load_dylibs_.emplace_back();
+        LoadDylib& ent = this->load_dylibs_.back();
+        ent.name_ = std::move(name);
+        ent.current_version_ = lc->dylib.current_version;
+        ent.compatibility_version_ = lc->dylib.compatibility_version;
+      }));
+  parsing_context.RegisterParser(
+      SegmentLoadCommandParser([this](segment_command_64* lc) {
+        this->segments_.emplace_back(base::AddressSpace(lc));
+      }));
+  parsing_context.RegisterParser(
+      ChainedFixupsLoadCommandParser([this](linkedit_data_command* lc) {
+        this->use_chained_fixups_ = true;
+
+        // Hand off parsing works to the helper.
+        ChainedFixupsHelper helper(*this, base::AddressSpace(lc));
+        // Hacks: load commands are being parsed, we temporarily allow accessing
+        // the data depending on them (which is safe here).
+        this->lc_partially_parsed_allowed_ = true;
+        helper.Parse();
+        this->lc_partially_parsed_allowed_ = false;
+      }));
+
   auto header = base_.As<mach_header_64>();
   ParsingDriver parsing_driver(base_.Skip(sizeof(mach_header_64)),
                                header->ncmds, parsing_context);
-  
+
   // Start parsing!
   parsing_driver.Run();
   lc_parsed_ = true;

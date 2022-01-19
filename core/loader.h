@@ -1,10 +1,10 @@
 #pragma once
 
-#include <string>
 #include <memory>
+#include <string>
 
-#include "core/platform/mapped_file.h"
 #include "core/macho/fat_binary.h"
+#include "core/platform/mapped_file.h"
 
 namespace macho_insight {
 
