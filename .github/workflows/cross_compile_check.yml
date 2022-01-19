@@ -5,7 +5,7 @@ on:
     branches: [ dev ]
 
 jobs:
-  build:
+  build-linux:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -13,4 +13,12 @@ jobs:
         submodules: true
     - uses: bazelbuild/setup-bazelisk@v1
     - run: bazel build //core --verbose_failures
+  build-macos:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+    - uses: bazelbuild/setup-bazelisk@v1
+    - run: bazel build //gui:macos-app --verbose_failures
 
