@@ -6,6 +6,12 @@ http_archive(
     url = "https://github.com/bazelbuild/rules_apple/releases/download/0.32.0/rules_apple.0.32.0.tar.gz",
 )
 
+http_archive(
+    name = "rules_foreign_cc",
+    strip_prefix = "rules_foreign_cc-e24d9cecfe4cadc496fe0c128ef5f8399a4e24a5",
+    url = "https://github.com/bazelbuild/rules_foreign_cc/archive/e24d9cecfe4cadc496fe0c128ef5f8399a4e24a5.tar.gz",
+)
+
 load(
     "@build_bazel_rules_apple//apple:repositories.bzl",
     "apple_rules_dependencies",
@@ -34,18 +40,15 @@ load(
 
 apple_support_dependencies()
 
+load(
+    "@rules_foreign_cc//foreign_cc:repositories.bzl",
+    "rules_foreign_cc_dependencies"
+)
+
+rules_foreign_cc_dependencies()
+
 # 3rd-party deps
 
-http_archive(
-    name = "com_github_gflags_gflags",
-    sha256 = "34af2f15cf7367513b352bdcd2493ab14ce43692d2dcd9dfc499492966c64dcf",
-    strip_prefix = "gflags-2.2.2",
-    urls = ["https://github.com/gflags/gflags/archive/v2.2.2.tar.gz"],
-)
+load(":deps.bzl", "third_party_library_dependencies")
 
-http_archive(
-    name = "com_github_google_glog",
-    sha256 = "21bc744fb7f2fa701ee8db339ded7dce4f975d0d55837a97be7d46e8382dea5a",
-    strip_prefix = "glog-0.5.0",
-    urls = ["https://github.com/google/glog/archive/v0.5.0.zip"],
-)
+third_party_library_dependencies()
