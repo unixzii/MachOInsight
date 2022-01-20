@@ -29,35 +29,19 @@
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Viewer</string>
 			<key>LSItemContentTypes</key>
 			<array>
-				<string>public.unix-executable</string>
+				<string>public.item</string>
 			</array>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>*</string>
+			</array>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
 			<key>NSDocumentClass</key>
 			<string>MachOInsightMain.Document</string>
 		</dict>
-		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Viewer</string>
-			<key>LSItemContentTypes</key>
-			<array>
-				<string>com.apple.mach-o-dylib</string>
-			</array>
-			<key>NSDocumentClass</key>
-			<string>MachOInsightMain.Document</string>
-		</dict>
-        <dict>
-            <key>CFBundleTypeRole</key>
-            <string>Viewer</string>
-            <key>LSItemContentTypes</key>
-            <array>
-                <string>public.data</string>
-            </array>
-            <key>NSDocumentClass</key>
-            <string>MachOInsightMain.Document</string>
-        </dict>
 	</array>
 </dict>
 </plist>
