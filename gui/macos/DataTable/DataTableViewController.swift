@@ -7,6 +7,7 @@ class DataTableViewController: NSViewController {
     var source: DataTableSource? {
         didSet {
             reloadColumns()
+            reloadMenu()
             outlineView.reloadData()
         }
     }
@@ -50,11 +51,102 @@ class DataTableViewController: NSViewController {
         }
     }
     
+    private func reloadMenu() {
+        let menu = NSMenu(title: "Context Menu")
+        menu.delegate = self
+        
+        // Add default items.
+        menu.addItem(withTitle: "", action: nil, keyEquivalent: "")
+        menu.addItem(withTitle: "Copy", action: #selector(copyText(_:)), keyEquivalent: "")
+        menu.addItem(withTitle: "Copy All", action: #selector(copyAllText(_:)), keyEquivalent: "")
+        
+        outlineView.menu = menu
+    }
+    
     private func tableColumnIdentifier(for index: Int) -> NSUserInterfaceItemIdentifier {
         return .init("Column\(index)")
     }
     
+    private func index(of tableColumn: NSTableColumn) -> Int? {
+        guard let source = self.source else {
+            return nil
+        }
+
+        for i in 0..<source.columns.count {
+            if tableColumn.identifier == tableColumnIdentifier(for: i) {
+                return i
+            }
+        }
+        return nil
+    }
+    
 }
+
+// MARK: - Context Menu
+
+extension DataTableViewController: NSMenuDelegate {
+    
+    private var clickedText: String? {
+        guard let source = self.source else {
+            return nil
+        }
+        guard let item = outlineView.item(atRow: outlineView.clickedRow) else {
+            return nil
+        }
+        let column = index(of: outlineView.tableColumns[outlineView.clickedColumn])!
+        let content = source.displayContent(for: item, column: column)
+        switch content {
+        case .text(let string):
+            return string
+        }
+        return nil
+    }
+    
+    func menuNeedsUpdate(_ menu: NSMenu) {
+        guard let clickedText = clickedText else {
+            menu.removeItem(at: 0)
+            return
+        }
+        menu.item(at: 0)?.title = clickedText
+    }
+    
+    @objc private func copyText(_ sender: Any) {
+        guard let clickedText = clickedText else {
+            return
+        }
+
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.setString(clickedText, forType: .string)
+    }
+    
+    @objc private func copyAllText(_ sender: Any) {
+        guard let source = self.source else {
+            return
+        }
+        guard let item = outlineView.item(atRow: outlineView.clickedRow) else {
+            return
+        }
+        
+        var strings = [String]()
+        for column in 0..<outlineView.tableColumns.count {
+            let content = source.displayContent(for: item, column: column)
+            switch content {
+            case .text(let string):
+                strings.append(string)
+            }
+        }
+        
+        let string = strings.joined(separator: " ")
+        
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.setString(string, forType: .string)
+    }
+    
+}
+
+// MARK: -
 
 extension DataTableViewController: NSOutlineViewDataSource {
     
@@ -90,12 +182,7 @@ extension DataTableViewController: NSOutlineViewDelegate {
             guard let tableColumn = tableColumn else {
                 return 0
             }
-            for i in 0..<source.columns.count {
-                if tableColumn.identifier == tableColumnIdentifier(for: i) {
-                    return i
-                }
-            }
-            fatalError()
+            return index(of: tableColumn)!
         }()
         let content = source.displayContent(for: item, column: columnIndex)
         
