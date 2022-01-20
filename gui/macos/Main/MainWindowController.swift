@@ -1,6 +1,6 @@
 import Cocoa
 
-class DocumentWindowController: NSWindowController {
+class MainWindowController: NSWindowController {
 
     override var document: AnyObject? {
         didSet {
@@ -55,7 +55,7 @@ class DocumentWindowController: NSWindowController {
 
 }
 
-extension DocumentWindowController: NSToolbarDelegate {
+extension MainWindowController: NSToolbarDelegate {
     
     func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
         return [.toggleSidebar]

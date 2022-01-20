@@ -8,4 +8,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
     }
     
+    func applicationOpenUntitledFile(_ sender: NSApplication) -> Bool {
+        NSDocumentController.shared.openDocument(sender)
+        return false
+    }
+    
 }

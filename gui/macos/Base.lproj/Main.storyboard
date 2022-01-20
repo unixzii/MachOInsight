@@ -684,7 +684,7 @@
         <!--Window Controller-->
         <scene sceneID="maf-Zc-2WE">
             <objects>
-                <windowController storyboardIdentifier="Document" id="tKo-1Q-R9u" customClass="DocumentWindowController" customModule="MachOInsightMain" sceneMemberID="viewController">
+                <windowController storyboardIdentifier="Document" id="tKo-1Q-R9u" customClass="MainWindowController" customModule="MachOInsightMain" sceneMemberID="viewController">
                     <window key="window" title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" toolbarStyle="compact" id="SEk-FO-wcZ">
                         <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES" fullSizeContentView="YES"/>
                         <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
@@ -740,10 +740,10 @@
             </objects>
             <point key="canvasLocation" x="276" y="482"/>
         </scene>
-        <!--Document Sidebar View Controller-->
+        <!--Main Sidebar View Controller-->
         <scene sceneID="ao6-4f-Lmp">
             <objects>
-                <viewController id="J97-bR-ECU" customClass="DocumentSidebarViewController" customModule="MachOInsightMain" sceneMemberID="viewController">
+                <viewController id="J97-bR-ECU" customClass="MainSidebarViewController" customModule="MachOInsightMain" sceneMemberID="viewController">
                     <view key="view" misplaced="YES" id="4d1-um-Uqi">
                         <rect key="frame" x="0.0" y="0.0" width="200" height="447"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -783,7 +783,7 @@
                                                                         <constraint firstAttribute="height" constant="22" id="SJ1-ba-eeG"/>
                                                                         <constraint firstAttribute="width" constant="28" id="ajT-IH-FeN"/>
                                                                     </constraints>
-                                                                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="NSActionTemplate" catalog="system" id="5x2-qs-yet"/>
+                                                                    <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" image="NSActionTemplate" id="5x2-qs-yet"/>
                                                                 </imageView>
                                                                 <textField verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" allowsExpansionToolTips="YES" translatesAutoresizingMaskIntoConstraints="NO" id="i4Q-Ov-w1A">
                                                                     <rect key="frame" x="28" y="8" width="135" height="16"/>
@@ -933,10 +933,10 @@
             </objects>
             <point key="canvasLocation" x="1327" y="234"/>
         </scene>
-        <!--View Controller-->
+        <!--Main View Controller-->
         <scene sceneID="LVA-48-lHF">
             <objects>
-                <viewController id="9l9-XT-xHu" sceneMemberID="viewController">
+                <viewController id="9l9-XT-xHu" customClass="MainViewController" customModule="MachOInsightMain" sceneMemberID="viewController">
                     <view key="view" id="yQy-KG-2rh">
                         <rect key="frame" x="0.0" y="0.0" width="302" height="300"/>
                         <autoresizingMask key="autoresizingMask"/>
@@ -950,6 +950,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="NSActionTemplate" catalog="system" width="15" height="15"/>
+        <image name="NSActionTemplate" width="15" height="15"/>
     </resources>
 </document>

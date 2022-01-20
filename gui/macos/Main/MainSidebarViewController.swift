@@ -1,6 +1,6 @@
 import Cocoa
 
-class DocumentSidebarViewController: NSViewController {
+class MainSidebarViewController: NSViewController {
 
     @IBOutlet var tableView: NSTableView!
     
@@ -11,7 +11,7 @@ class DocumentSidebarViewController: NSViewController {
     
 }
 
-extension DocumentSidebarViewController: NSTableViewDataSource {
+extension MainSidebarViewController: NSTableViewDataSource {
     
     func numberOfRows(in tableView: NSTableView) -> Int {
         return DocumentPageProvider.pages.count
@@ -19,7 +19,7 @@ extension DocumentSidebarViewController: NSTableViewDataSource {
     
 }
 
-extension DocumentSidebarViewController: NSTableViewDelegate {
+extension MainSidebarViewController: NSTableViewDelegate {
     
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
         guard let cell = tableView.makeView(withIdentifier: .init("Cell"), owner: nil) as? NSTableCellView else {

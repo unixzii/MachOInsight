@@ -13,7 +13,7 @@ swift_library(
 
 objc_library(
     name = "macos-resources",
-    data = ["macos/Base.lproj/Main.storyboard"],
+    data = glob(["macos/**/*.xib", "macos/**/*.storyboard"]),
 )
 
 macos_application(
