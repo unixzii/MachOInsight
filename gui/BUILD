@@ -6,7 +6,7 @@ load("@build_bazel_rules_apple//apple:macos.bzl", "macos_application")
 
 swift_library(
     name = "macos-main",
-    srcs = glob(["macos/*.swift"]),
+    srcs = glob(["macos/**/*.swift"]),
     module_name = "MachOInsightMain",
     deps = ["//gui/common:common"],
 )

@@ -4,8 +4,7 @@ import MachOInsightCommon
 class Document: NSDocument {
 
     override func makeWindowControllers() {
-        let storyboard = NSStoryboard(name: NSStoryboard.Name("Main"), bundle: nil)
-        if let windowController = storyboard.instantiateController(
+        if let windowController = NSStoryboard.ensuredMain.instantiateController(
             withIdentifier: NSStoryboard.SceneIdentifier("Document")
         ) as? NSWindowController {
             addWindowController(windowController)
@@ -25,6 +24,17 @@ class Document: NSDocument {
 
     override class var autosavesInPlace: Bool {
         return true
+    }
+    
+    func loadEssentialData(
+        progressHandler: @escaping (_ progress: Double, _ status: String) -> Void,
+        completionHandler: @escaping (_ error: Error?) -> Void
+    ) {
+        // TODO: fake it till you make it.
+        progressHandler(0.4, "Fake loading status")
+        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) {
+            completionHandler(nil)
+        }
     }
 
 }
