@@ -45,6 +45,7 @@ class MachOBinary : public base::Object {
 
  private:
   friend class ChainedFixupsHelper;
+  friend class macho_insight::Loader;
 
   void ParseLoadCommands();
 

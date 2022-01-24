@@ -24,39 +24,64 @@ bool Loader::TryLoad() {
 
   auto file_base = mapped_file->Start();
   auto maybe_fat_binary = std::make_shared<macho::FatBinary>(file_base);
-  if (!maybe_fat_binary->IsValid()) {
+  if (maybe_fat_binary->IsValid()) {
+    content_ = maybe_fat_binary;
+    LOG(INFO) << "Fat binary loaded, with " << maybe_fat_binary->ArchCount()
+              << " arch(s)";
+  } else {
     LOG(INFO) << "Not a fat binary";
-    return false;
+    auto maybe_macho_binary = std::make_shared<macho::MachOBinary>(file_base);
+    if (maybe_macho_binary->IsValid()) {
+      content_ = maybe_macho_binary;
+      LOG(INFO) << "Mach-O binary loaded";
+    } else {
+      LOG(INFO) << "Not a Mach-O binary";
+      return false;
+    }
   }
 
-  LOG(INFO) << "Fat binary loaded, with " << maybe_fat_binary->ArchCount()
-            << " arch(s)";
-
   mapped_file_ = mapped_file;
-  fat_binary_ = maybe_fat_binary;
   loaded_ = true;
   return true;
 }
 
 size_t Loader::ArchCount() const {
-  if (!fat_binary_) {
+  if (content_.valueless_by_exception()) {
     return 0;
   }
-  return fat_binary_->ArchCount();
+
+  if (!IsFatBinary()) {
+    return 1;
+  }
+  return std::get<FatBinaryPtr>(content_)->ArchCount();
 }
 
 macho::ArchType Loader::ArchTypeAt(size_t idx) const {
-  if (!fat_binary_) {
+  if (content_.valueless_by_exception()) {
     return macho::ArchType::Unknown;
   }
-  return fat_binary_->ArchTypeAt(idx);
+
+  if (!IsFatBinary()) {
+    if (idx > 0) {
+      return macho::ArchType::Unknown;
+    }
+    return std::get<MachOBinaryPtr>(content_)->ArchType();
+  }
+  return std::get<FatBinaryPtr>(content_)->ArchTypeAt(idx);
 }
 
 macho::MachOBinary* Loader::MachOBinaryAt(size_t idx) const {
-  if (!fat_binary_) {
+  if (content_.valueless_by_exception()) {
     return nullptr;
   }
-  return fat_binary_->MachOBinaryAt(idx);
+
+  if (!IsFatBinary()) {
+    auto ptr = std::get<MachOBinaryPtr>(content_);
+    // This method always returns an owned object, therefore we need to
+    // create a new instance.
+    return new macho::MachOBinary(ptr->base_);
+  }
+  return std::get<FatBinaryPtr>(content_)->MachOBinaryAt(idx);
 }
 
 }  // macho_insight namespace

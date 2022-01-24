@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string>
+#include <variant>
 
 #include "core/macho/fat_binary.h"
 #include "core/platform/mapped_file.h"
@@ -15,14 +16,18 @@ class Loader {
 
   bool TryLoad();
 
+  inline bool IsFatBinary() const { return content_.index() == 0; }
   size_t ArchCount() const;
   macho::ArchType ArchTypeAt(size_t idx) const;
   macho::MachOBinary* MachOBinaryAt(size_t idx) const;
 
  private:
+  using FatBinaryPtr = std::shared_ptr<macho::FatBinary>;
+  using MachOBinaryPtr = std::shared_ptr<macho::MachOBinary>;
+
   std::string path_;
   std::shared_ptr<platform::MappedFile> mapped_file_;
-  std::shared_ptr<macho::FatBinary> fat_binary_;
+  std::variant<FatBinaryPtr, MachOBinaryPtr> content_;
   bool loaded_ = false;
 };
 
