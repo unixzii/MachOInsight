@@ -6,6 +6,7 @@ objc_library(
     srcs = glob(["**/*.m", "**/*.mm", "**/*.cc"]),
     hdrs = glob(["**/*.h"]),
     module_name = "MachOInsightCommon",
+    copts = ["-std=c++17"],
     deps = ["//core:core"],
     visibility = ["//gui:__pkg__"],
 )
