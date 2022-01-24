@@ -8,12 +8,6 @@
 namespace macho_insight {
 namespace macho {
 
-enum class ArchType : int {
-  Unknown = 0,
-  X86_64 = 1,
-  ARM64 = 2,
-};
-
 class FatBinary : public base::Object {
  public:
   OBJ_TYPE_DECL(ObjectType::FatBinary)

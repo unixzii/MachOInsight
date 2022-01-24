@@ -81,6 +81,20 @@ bool MachOBinary::IsValid() const {
   return false;
 }
 
+ArchType MachOBinary::ArchType() const {
+  auto header = base_.As<mach_header_64>();
+  switch (header->cputype) {
+    case CPU_TYPE_X86_64:
+      return ArchType::X86_64;
+      break;
+    case CPU_TYPE_ARM64:
+      return ArchType::ARM64;
+    default:
+      break;
+  }
+  return ArchType::Unknown;
+}
+
 size_t MachOBinary::LoadDylibCount() {
   ParseLoadCommands();
   return load_dylibs_.size();

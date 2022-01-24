@@ -10,7 +10,16 @@
 #include "core/macho/segment.h"
 
 namespace macho_insight {
+
+class Loader;
+
 namespace macho {
+
+enum class ArchType : int {
+  Unknown = 0,
+  X86_64 = 1,
+  ARM64 = 2,
+};
 
 struct LoadDylib {
   std::string name_;
@@ -25,6 +34,8 @@ class MachOBinary : public base::Object {
   MachOBinary(base::AddressSpace base) : base_(base) { }
 
   bool IsValid() const;
+
+  ArchType ArchType() const;
 
   size_t LoadDylibCount();
   const LoadDylib& LoadDylibAt(size_t idx);

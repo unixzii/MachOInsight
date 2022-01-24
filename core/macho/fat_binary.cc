@@ -2,6 +2,7 @@
 
 #include "core/base/addr_space.h"
 #include "core/platform/byte_order.h"
+#include "core/macho/macho_data_types.h"
 
 #include "core/macho/fat_binary.h"
 
@@ -16,17 +17,6 @@ struct fat_header {
   uint32_t magic;     /* FAT_MAGIC */
   uint32_t nfat_arch; /* number of structs that follow */
 };
-
-constexpr static uint32_t CPU_ARCH_MASK =
-    0xff000000; /* mask for architecture bits */
-constexpr static uint32_t CPU_ARCH_ABI64 = 0x01000000; /* 64 bit ABI */
-constexpr static uint32_t CPU_ARCH_ABI64_32 =
-    0x02000000; /* ABI for 64-bit hardware with 32-bit types; LP32 */
-
-constexpr static uint32_t CPU_TYPE_X86 = ((uint32_t) 7);
-constexpr static uint32_t CPU_TYPE_X86_64 = (CPU_TYPE_X86 | CPU_ARCH_ABI64);
-constexpr static uint32_t CPU_TYPE_ARM = ((uint32_t) 12);
-constexpr static uint32_t CPU_TYPE_ARM64 = (CPU_TYPE_ARM | CPU_ARCH_ABI64);
 
 struct fat_arch {
   uint32_t cputype;    /* cpu specifier (int) */

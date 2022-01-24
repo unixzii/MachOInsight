@@ -8,6 +8,17 @@ namespace macho {
 constexpr static uint32_t MH_MAGIC_64 = 0xfeedfacf;
 constexpr static uint32_t MH_CIGAM_64 = platform::SwapConst(MH_MAGIC_64);
 
+constexpr static uint32_t CPU_ARCH_MASK =
+    0xff000000; /* mask for architecture bits */
+constexpr static uint32_t CPU_ARCH_ABI64 = 0x01000000; /* 64 bit ABI */
+constexpr static uint32_t CPU_ARCH_ABI64_32 =
+    0x02000000; /* ABI for 64-bit hardware with 32-bit types; LP32 */
+
+constexpr static uint32_t CPU_TYPE_X86 = ((uint32_t) 7);
+constexpr static uint32_t CPU_TYPE_X86_64 = (CPU_TYPE_X86 | CPU_ARCH_ABI64);
+constexpr static uint32_t CPU_TYPE_ARM = ((uint32_t) 12);
+constexpr static uint32_t CPU_TYPE_ARM64 = (CPU_TYPE_ARM | CPU_ARCH_ABI64);
+
 struct mach_header_64 {
   uint32_t magic;       /* mach magic number identifier */
   uint32_t cputype;     /* cpu specifier */
