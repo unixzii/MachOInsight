@@ -1,12 +1,80 @@
 import Cocoa
 
+fileprivate class _PickerControllerDelegateForwarder: ListPickerControllerDelegate {
+    
+    var cancelHandler: (() -> ())?
+    var selectHandler: ((Int) -> ())?
+    
+    func listPickerControllerDidCancel(_ sender: ListPickerController) {
+        cancelHandler?()
+    }
+    
+    func listPickerController(_ sender: ListPickerController, didSelectItemAt index: Int) {
+        selectHandler?(index)
+    }
+    
+}
+
 class MainWindowController: NSWindowController {
 
     override var document: AnyObject? {
         didSet {
-            if document != nil {
-                loadDocumentAndReportProgress()
+            guard document != nil else { return }
+            handleDocumentChange()
+        }
+    }
+    
+    private func handleDocumentChange() {
+        promptToSelectArchIfNeeded {
+            self.loadDocumentAndReportProgress()
+        }
+    }
+    
+    private func promptToSelectArchIfNeeded(completionHandler: @escaping () -> ()) {
+        let appDocument = self.appDocument!
+        let archs: [String] = appDocument.archs.map({ archType in
+            switch archType {
+            case .X86_64:
+                return "x86 (64 bits)"
+            case .ARM64:
+                return "AArch64"
+            default:
+                return "(Unknown)"
             }
+        })
+        
+        guard archs.count > 1 else {
+            completionHandler()
+            return
+        }
+        
+        // Ensure the window has displayed.
+        OperationQueue.main.addOperation {
+            let parentViewController = self.contentViewController!
+            
+            let picker = ListPickerController()
+            picker.title = "Select an arch to load:"
+            picker.items = archs.map { .plainText(text: $0) }
+            
+            let delegate = _PickerControllerDelegateForwarder()
+            delegate.cancelHandler = {
+                parentViewController.dismiss(picker)
+                self.close()
+                
+                // Break the retain cycle.
+                delegate.cancelHandler = nil
+            }
+            delegate.selectHandler = { [unowned delegate] in
+                appDocument.indexOfCurrentArch = UInt($0)
+                parentViewController.dismiss(picker)
+                
+                completionHandler()
+                
+                delegate.cancelHandler = nil
+            }
+            picker.delegate = delegate
+            
+            parentViewController.presentAsSheet(picker)
         }
     }
     
@@ -42,6 +110,7 @@ class MainWindowController: NSWindowController {
                 viewController.updateProgress(progress, with: status)
             }
         } completionHandler: { error in
+            // TODO: error handling...
             OperationQueue.main.addOperation {
                 view.removeFromSuperview()
                 viewController.removeFromParent()
@@ -49,6 +118,10 @@ class MainWindowController: NSWindowController {
                 window.titleVisibility = .visible
                 window.titlebarAppearsTransparent = false
                 window.toolbar?.isVisible = true
+                
+                // TODO: need some refactor, create a Navigator class to manage this.
+                let splitViewController = self.contentViewController as? NSSplitViewController
+                (splitViewController?.splitViewItems[1].viewController as? MainViewController)?.reload()
             }
         }
     }

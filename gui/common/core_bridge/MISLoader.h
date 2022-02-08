@@ -2,6 +2,12 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+typedef NS_ENUM(NSUInteger, MISArchType) {
+    MISArchTypeUnknown = 0,
+    MISArchTypeX86_64 = 1,
+    MISArchTypeARM64 = 2,
+};
+
 @class MISMachOBinary;
 
 @interface MISLoader : NSObject
@@ -14,7 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (BOOL)tryLoad;
 
-- (NSInteger)archTypeAtIndex:(NSUInteger)index;
+- (MISArchType)archTypeAtIndex:(NSUInteger)index;
 - (MISMachOBinary *)machOBinaryAtIndex:(NSUInteger)index;
 
 @end

@@ -7,3 +7,11 @@ extension NSViewController {
     }
     
 }
+
+extension NSWindowController {
+    
+    var appDocument: Document? {
+        return contentViewController?.document
+    }
+    
+}

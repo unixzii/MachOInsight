@@ -28,8 +28,8 @@ using namespace macho_insight;
     return _cxxLoader->ArchCount();
 }
 
-- (NSInteger)archTypeAtIndex:(NSUInteger)index {
-    return (NSInteger) _cxxLoader->ArchTypeAt(index);
+- (MISArchType)archTypeAtIndex:(NSUInteger)index {
+    return (MISArchType) _cxxLoader->ArchTypeAt(index);
 }
 
 - (id)machOBinaryAtIndex:(NSUInteger)index {

@@ -4,6 +4,9 @@ import MachOInsightCommon
 class Document: NSDocument {
     
     private var coreLoader: MISLoader!
+    private(set) var archs: [MISArchType] = []
+    
+    var indexOfCurrentArch: UInt = 0
 
     override func makeWindowControllers() {
         if let windowController = NSStoryboard.ensuredMain.instantiateController(
@@ -23,6 +26,11 @@ class Document: NSDocument {
             throw NSError(domain: "me.cyandev.MacOInsightMac", code: paramErr, userInfo: nil)
         }
         coreLoader = loader
+        
+        archs.removeAll()
+        for archIndex in 0..<coreLoader.numberOfArchs {
+            archs.append(coreLoader.archType(at: archIndex))
+        }
     }
 
     override class var autosavesInPlace: Bool {
@@ -48,7 +56,7 @@ class Document: NSDocument {
     func withCurrentBinary(_ block: (MISMachOBinary) -> Void) {
         // TODO: add universal binary supports.
         withLoader { loader in
-            block(loader.machOBinary(at: 0))
+            block(loader.machOBinary(at: self.indexOfCurrentArch))
         }
     }
 

@@ -6,7 +6,9 @@ class MainViewController: NSViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+    }
+    
+    public func reload() {
         // TODO: here we only add a hard-coded view controller for test.
         switchTo(DependenciesViewController())
     }
