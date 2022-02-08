@@ -31,11 +31,16 @@ class MachOBinary : public base::Object {
  public:
   OBJ_TYPE_DECL(ObjectType::MachOBinary)
 
-  MachOBinary(base::AddressSpace base) : base_(base) { }
+  MachOBinary(base::AddressSpace base)
+      : base_(base),
+        lc_parsed_(false),
+        lc_parsing_(false),
+        lc_partially_parsed_allowed_(false),
+        use_chained_fixups_(false) { }
 
   bool IsValid() const;
 
-  ArchType ArchType() const;
+  ArchType arch_type() const;
 
   size_t LoadDylibCount();
   const LoadDylib& LoadDylibAt(size_t idx);
@@ -52,11 +57,11 @@ class MachOBinary : public base::Object {
   base::AddressSpace base_;
 
   // Load command parsing state:
-  bool lc_parsed_ : 1 = false;
-  bool lc_parsing_ : 1 = false;
-  bool lc_partially_parsed_allowed_ : 1 = false;
+  bool lc_parsed_ : 1;
+  bool lc_parsing_ : 1;
+  bool lc_partially_parsed_allowed_ : 1;
 
-  bool use_chained_fixups_ : 1 = false;
+  bool use_chained_fixups_ : 1;
 
   std::vector<LoadDylib> load_dylibs_;
   std::vector<Segment> segments_;

@@ -81,7 +81,7 @@ bool MachOBinary::IsValid() const {
   return false;
 }
 
-ArchType MachOBinary::ArchType() const {
+ArchType MachOBinary::arch_type() const {
   auto header = base_.As<mach_header_64>();
   switch (header->cputype) {
     case CPU_TYPE_X86_64:

@@ -65,7 +65,7 @@ macho::ArchType Loader::ArchTypeAt(size_t idx) const {
     if (idx > 0) {
       return macho::ArchType::Unknown;
     }
-    return std::get<MachOBinaryPtr>(content_)->ArchType();
+    return std::get<MachOBinaryPtr>(content_)->arch_type();
   }
   return std::get<FatBinaryPtr>(content_)->ArchTypeAt(idx);
 }
