@@ -160,6 +160,10 @@ extension DataTableViewController: NSOutlineViewDataSource {
         return source.numberOfRows
     }
     
+    func outlineView(_ outlineView: NSOutlineView, isItemExpandable item: Any) -> Bool {
+        return (source?.numberOfChildren(of: item) ?? 0) > 0
+    }
+    
     func outlineView(_ outlineView: NSOutlineView, child index: Int, ofItem item: Any?) -> Any {
         guard let source = self.source else {
             fatalError()
@@ -168,6 +172,10 @@ extension DataTableViewController: NSOutlineViewDataSource {
             return source.child(at: index, ofItem: item)
         }
         return source.item(at: index)
+    }
+    
+    func outlineView(_ outlineView: NSOutlineView, objectValueFor tableColumn: NSTableColumn?, byItem item: Any?) -> Any? {
+        return item
     }
     
 }
