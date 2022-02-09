@@ -101,3 +101,11 @@ class DependenciesViewController: NSViewController {
     }
     
 }
+
+extension DependenciesViewController: DocumentPageConstructible {
+    
+    static func create() -> NSViewController {
+        return DependenciesViewController()
+    }
+    
+}
