@@ -1,8 +1,8 @@
 #include <memory>
 
 #include "core/base/addr_space.h"
-#include "core/platform/byte_order.h"
 #include "core/macho/macho_data_types.h"
+#include "core/platform/byte_order.h"
 
 #include "core/macho/fat_binary.h"
 
@@ -63,19 +63,23 @@ ArchType FatBinary::ArchTypeAt(size_t idx) const {
   return type;
 }
 
-MachOBinary* FatBinary::MachOBinaryAt(size_t idx) const {
+std::shared_ptr<MachOBinary> FatBinary::MachOBinaryAt(size_t idx) const {
   // Seek to the required arch segment.
   auto arch_start = base_.Skip(sizeof(fat_header)).Skip(sizeof(fat_arch) * idx);
   auto arch = arch_start.As<fat_arch>();
   auto offset = platform::SwapBigToHostConst(arch->offset);
 
-  std::unique_ptr<MachOBinary> sub_binary(new MachOBinary(base_.Skip(offset)));
+  // Make a copy because const reference cannot be implicitly converted
+  // to lvalue reference.
+  auto mapped_file = mapped_file_;
+
+  auto sub_binary =
+      std::make_shared<MachOBinary>(mapped_file, base_.Skip(offset));
   if (!sub_binary->IsValid()) {
     return nullptr;
   }
 
-  // Handle off the memory management to caller.
-  return sub_binary.release();
+  return sub_binary;
 }
 
 }  // macho namespace

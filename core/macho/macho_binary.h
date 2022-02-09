@@ -8,6 +8,7 @@
 #include "core/base/object.h"
 #include "core/macho/obj_types.h"
 #include "core/macho/segment.h"
+#include "core/platform/mapped_file.h"
 
 namespace macho_insight {
 
@@ -31,8 +32,10 @@ class MachOBinary : public base::Object {
  public:
   OBJ_TYPE_DECL(ObjectType::MachOBinary)
 
-  MachOBinary(base::AddressSpace base)
-      : base_(base),
+  MachOBinary(std::shared_ptr<platform::MappedFile>& mapped_file,
+              base::AddressSpace base)
+      : mapped_file_(mapped_file),
+        base_(base),
         lc_parsed_(false),
         lc_parsing_(false),
         lc_partially_parsed_allowed_(false),
@@ -54,6 +57,7 @@ class MachOBinary : public base::Object {
 
   void ParseLoadCommands();
 
+  std::shared_ptr<platform::MappedFile> mapped_file_;
   base::AddressSpace base_;
 
   // Load command parsing state:

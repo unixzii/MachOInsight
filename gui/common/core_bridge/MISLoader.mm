@@ -34,7 +34,7 @@ using namespace macho_insight;
 
 - (id)machOBinaryAtIndex:(NSUInteger)index {
     auto cxxBinary = _cxxLoader->MachOBinaryAt(index);
-    return [[MISMachOBinary alloc] initWithParentLoader:self cxxObject:cxxBinary];
+    return [[MISMachOBinary alloc] initWithCxxObject:(void **) &cxxBinary];
 }
 
 @end

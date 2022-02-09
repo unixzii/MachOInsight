@@ -20,7 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 + (instancetype)new NS_UNAVAILABLE;
 - (instancetype)init NS_UNAVAILABLE;
-- (instancetype)initWithParentLoader:(MISLoader *)loader cxxObject:(void *)cxxObject;
+- (instancetype)initWithCxxObject:(void * _Nullable * _Nonnull)cxxObject;
 
 - (MISLoadDylib *)loadDylibAtIndex:(NSUInteger)index;
 

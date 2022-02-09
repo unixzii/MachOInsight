@@ -19,15 +19,14 @@ using namespace macho_insight;
 @end
 
 @implementation MISMachOBinary {
-    MISLoader *_parent;
-    std::unique_ptr<macho::MachOBinary> _cxxObject;
+    std::shared_ptr<macho::MachOBinary> _cxxObject;
 }
 
-- (instancetype)initWithParentLoader:(MISLoader *)loader cxxObject:(void *)cxxObject {
+- (instancetype)initWithCxxObject:(void **)cxxObject {
     self = [super init];
     if (self) {
-        _parent = loader;
-        _cxxObject.reset(reinterpret_cast<macho::MachOBinary *>(cxxObject));
+        auto cxxObjectPtr = reinterpret_cast<std::shared_ptr<macho::MachOBinary> *>(cxxObject);
+        _cxxObject = std::move(*cxxObjectPtr);
     }
     return self;
 }

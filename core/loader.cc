@@ -23,14 +23,14 @@ bool Loader::TryLoad() {
   }
 
   auto file_base = mapped_file->Start();
-  auto maybe_fat_binary = std::make_shared<macho::FatBinary>(file_base);
+  auto maybe_fat_binary = std::make_shared<macho::FatBinary>(mapped_file, file_base);
   if (maybe_fat_binary->IsValid()) {
     content_ = maybe_fat_binary;
     LOG(INFO) << "Fat binary loaded, with " << maybe_fat_binary->ArchCount()
               << " arch(s)";
   } else {
     LOG(INFO) << "Not a fat binary";
-    auto maybe_macho_binary = std::make_shared<macho::MachOBinary>(file_base);
+    auto maybe_macho_binary = std::make_shared<macho::MachOBinary>(mapped_file, file_base);
     if (maybe_macho_binary->IsValid()) {
       content_ = maybe_macho_binary;
       LOG(INFO) << "Mach-O binary loaded";
@@ -70,16 +70,13 @@ macho::ArchType Loader::ArchTypeAt(size_t idx) const {
   return std::get<FatBinaryPtr>(content_)->ArchTypeAt(idx);
 }
 
-macho::MachOBinary* Loader::MachOBinaryAt(size_t idx) const {
+std::shared_ptr<macho::MachOBinary> Loader::MachOBinaryAt(size_t idx) const {
   if (content_.valueless_by_exception()) {
     return nullptr;
   }
 
   if (!IsFatBinary()) {
-    auto ptr = std::get<MachOBinaryPtr>(content_);
-    // This method always returns an owned object, therefore we need to
-    // create a new instance.
-    return new macho::MachOBinary(ptr->base_);
+    return std::get<MachOBinaryPtr>(content_);
   }
   return std::get<FatBinaryPtr>(content_)->MachOBinaryAt(idx);
 }

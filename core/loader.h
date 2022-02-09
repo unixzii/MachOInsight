@@ -19,7 +19,7 @@ class Loader {
   inline bool IsFatBinary() const { return content_.index() == 0; }
   size_t ArchCount() const;
   macho::ArchType ArchTypeAt(size_t idx) const;
-  macho::MachOBinary* MachOBinaryAt(size_t idx) const;
+  std::shared_ptr<macho::MachOBinary> MachOBinaryAt(size_t idx) const;
 
  private:
   using FatBinaryPtr = std::shared_ptr<macho::FatBinary>;
