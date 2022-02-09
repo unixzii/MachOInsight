@@ -2,11 +2,21 @@ import Cocoa
 
 class MainSidebarViewController: NSViewController {
 
-    @IBOutlet var tableView: NSTableView!
+    @IBOutlet private var tableView: NSTableView!
+    
+    var selectionChangeHandler: ((Int) -> ())?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do view setup here.
+    }
+    
+    func selectItem(at index: Int) {
+        tableView.selectRowIndexes(.init(integer: index), byExtendingSelection: false)
+        
+        // Once some items in the table view is selected, the selection must not
+        // be empty in the future.
+        tableView.allowsEmptySelection = false
     }
     
 }
@@ -29,6 +39,10 @@ extension MainSidebarViewController: NSTableViewDelegate {
         cell.textField?.stringValue = page.title
         cell.imageView?.image = .init(systemSymbolName: page.iconName, accessibilityDescription: page.title)
         return cell
+    }
+    
+    func tableViewSelectionDidChange(_ notification: Notification) {
+        selectionChangeHandler?(tableView.selectedRow)
     }
     
 }

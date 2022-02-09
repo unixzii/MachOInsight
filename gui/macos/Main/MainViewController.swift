@@ -8,12 +8,7 @@ class MainViewController: NSViewController {
         super.viewDidLoad()
     }
     
-    public func reload() {
-        // TODO: here we only add a hard-coded view controller for test.
-        switchTo(DependenciesViewController())
-    }
-    
-    private func switchTo(_ viewController: NSViewController) {
+    func replaceContent(_ viewController: NSViewController) {
         if let contentViewController = self.contentViewController {
             contentViewController.view.removeFromSuperview()
             contentViewController.removeFromParent()

@@ -17,11 +17,24 @@ fileprivate class _PickerControllerDelegateForwarder: ListPickerControllerDelega
 
 class MainWindowController: NSWindowController {
 
+    private var navigator: Navigator!
+    
     override var document: AnyObject? {
         didSet {
             guard document != nil else { return }
             handleDocumentChange()
         }
+    }
+    
+    override func windowDidLoad() {
+        super.windowDidLoad()
+        
+        // Setup the navigator.
+        let splitViewController = self.contentViewController as! NSSplitViewController
+        let sidebarViewController = splitViewController.splitViewItems[0].viewController as! MainSidebarViewController
+        let mainViewController = splitViewController.splitViewItems[1].viewController as! MainViewController
+        navigator = Navigator()
+        navigator.connect(withSidebar: sidebarViewController, mainViewController: mainViewController)
     }
     
     private func handleDocumentChange() {
@@ -119,9 +132,7 @@ class MainWindowController: NSWindowController {
                 window.titlebarAppearsTransparent = false
                 window.toolbar?.isVisible = true
                 
-                // TODO: need some refactor, create a Navigator class to manage this.
-                let splitViewController = self.contentViewController as? NSSplitViewController
-                (splitViewController?.splitViewItems[1].viewController as? MainViewController)?.reload()
+                self.navigator.navigateToPage(at: 0)
             }
         }
     }
