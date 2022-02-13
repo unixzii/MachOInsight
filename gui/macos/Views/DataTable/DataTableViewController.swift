@@ -12,10 +12,46 @@ class DataTableViewController: NSViewController {
         }
     }
     
+    var selectionChangeHandler: ((Any?) -> ())?
+    
+    var showsHeaderView: Bool {
+        get {
+            return outlineView.headerView != nil
+        }
+        set {
+            if newValue {
+                outlineView.headerView = .init()
+            } else {
+                outlineView.headerView = nil
+            }
+        }
+    }
+    
+    var usesAlternatingRowBackgroundColors: Bool {
+        get {
+            return outlineView.usesAlternatingRowBackgroundColors
+        }
+        set {
+            outlineView.usesAlternatingRowBackgroundColors = newValue
+        }
+    }
+    
     @IBOutlet private var outlineView: NSOutlineView!
     
     convenience init() {
         self.init(nibName: "DataTable", bundle: nil)
+    }
+    
+    override init(nibName nibNameOrNil: NSNib.Name?, bundle nibBundleOrNil: Bundle?) {
+        super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
+        
+        // Eager load view to make sure that setting a property immediately after
+        // the view controller is created will take effect.
+        let _ = view
+    }
+    
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
     }
     
     override func viewDidLoad() {
@@ -98,6 +134,8 @@ extension DataTableViewController: NSMenuDelegate {
         switch content {
         case .text(let string):
             return string
+        case .code(let string):
+            return string
         }
         return nil
     }
@@ -133,6 +171,8 @@ extension DataTableViewController: NSMenuDelegate {
             let content = source.displayContent(for: item, column: column)
             switch content {
             case .text(let string):
+                strings.append(string)
+            case .code(let string):
                 strings.append(string)
             }
         }
@@ -198,10 +238,24 @@ extension DataTableViewController: NSOutlineViewDelegate {
         case .text(let string):
             let cell = outlineView.makeView(withIdentifier: cellIdentifier, owner: nil) as! NSTableCellView
             cell.textField?.stringValue = string
+            cell.textField?.font = .systemFont(ofSize: 12)
+            return cell
+        case .code(let string):
+            let cell = outlineView.makeView(withIdentifier: cellIdentifier, owner: nil) as! NSTableCellView
+            cell.textField?.stringValue = string
+            cell.textField?.font = .monospacedSystemFont(ofSize: 12, weight: .regular)
             return cell
         }
+    }
+    
+    func outlineViewSelectionDidChange(_ notification: Notification) {
+        if outlineView.numberOfSelectedRows == 0 {
+            selectionChangeHandler?(nil)
+            return
+        }
         
-        return nil
+        let selectedItem = outlineView.item(atRow: outlineView.selectedRow)
+        selectionChangeHandler?(selectedItem)
     }
     
 }

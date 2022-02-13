@@ -2,6 +2,7 @@ import Foundation
 
 enum DataTableDisplayContent {
     case text(String)
+    case code(String)
 }
 
 protocol DataTableSource {
