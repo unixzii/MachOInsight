@@ -29,6 +29,8 @@ class Variant final {
 
   ~Variant();
 
+  Variant() : data_type_(0){};
+
   Variant(const Variant& o);
   Variant(Variant&& o);
 
@@ -40,6 +42,7 @@ class Variant final {
   Variant(float f);
   Variant(double d);
 
+  inline Variant(const char* s) : Variant(std::string(s)) { }
   Variant(const std::string& s);
 
   Variant(const std::vector<Variant>& list);
