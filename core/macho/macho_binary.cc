@@ -3,11 +3,11 @@
 
 #include "core/base/addr_space.h"
 #include "core/macho/chained_fixups.h"
+#include "core/macho/fat_binary.h"
+#include "core/macho/load_command_dump.h"
 #include "core/macho/macho_data_types.h"
 #include "core/platform/byte_order.h"
 #include "core/utils/logger.h"
-
-#include "core/macho/fat_binary.h"
 
 namespace {
 
@@ -115,6 +115,12 @@ const Segment& MachOBinary::SegmentAt(size_t idx) {
   return segments_[idx];
 }
 
+const std::vector<std::shared_ptr<base::Variant>>&
+MachOBinary::DumpedLoadCommands() {
+  ParseLoadCommands();
+  return dumped_load_commands_;
+}
+
 void MachOBinary::ParseLoadCommands() {
   if (lc_parsed_ || lc_partially_parsed_allowed_) {
     return;
@@ -159,6 +165,10 @@ void MachOBinary::ParseLoadCommands() {
         ent.name_ = std::move(name);
         ent.current_version_ = lc->dylib.current_version;
         ent.compatibility_version_ = lc->dylib.compatibility_version;
+
+        this->AddDumpedLoadCommand(
+            LoadCommandDumpHelper(this->mapped_file_->Start())
+                .DumpLoadDylib(lc));
       }));
   parsing_context.RegisterParser(
       SegmentLoadCommandParser([this](segment_command_64* lc) {
@@ -185,6 +195,11 @@ void MachOBinary::ParseLoadCommands() {
   parsing_driver.Run();
   lc_parsed_ = true;
   lc_parsing_ = false;
+}
+
+void MachOBinary::AddDumpedLoadCommand(base::Variant&& v) {
+  dumped_load_commands_.push_back(
+      std::make_shared<base::Variant>(std::move(v)));
 }
 
 }  // macho namespace

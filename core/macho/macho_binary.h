@@ -6,6 +6,7 @@
 
 #include "core/base/addr_space.h"
 #include "core/base/object.h"
+#include "core/base/variant.h"
 #include "core/macho/obj_types.h"
 #include "core/macho/segment.h"
 #include "core/platform/mapped_file.h"
@@ -51,11 +52,15 @@ class MachOBinary : public base::Object {
   size_t SegmentCount();
   const Segment& SegmentAt(size_t idx);
 
+  const std::vector<std::shared_ptr<base::Variant>>& DumpedLoadCommands();
+
  private:
   friend class ChainedFixupsHelper;
   friend class macho_insight::Loader;
 
   void ParseLoadCommands();
+
+  void AddDumpedLoadCommand(base::Variant&& v);
 
   std::shared_ptr<platform::MappedFile> mapped_file_;
   base::AddressSpace base_;
@@ -66,6 +71,8 @@ class MachOBinary : public base::Object {
   bool lc_partially_parsed_allowed_ : 1;
 
   bool use_chained_fixups_ : 1;
+
+  std::vector<std::shared_ptr<base::Variant>> dumped_load_commands_;
 
   std::vector<LoadDylib> load_dylibs_;
   std::vector<Segment> segments_;
