@@ -67,14 +67,7 @@ class DependenciesViewController: NSViewController {
         addChild(dataTableViewController)
         
         let dataTableView = dataTableViewController.view
-        dataTableView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(dataTableView)
-        NSLayoutConstraint.activate([
-            dataTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            dataTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            dataTableView.topAnchor.constraint(equalTo: view.topAnchor),
-            dataTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-        ])
+        view.addFilledSubview(dataTableView)
     }
     
     override func viewDidAppear() {
