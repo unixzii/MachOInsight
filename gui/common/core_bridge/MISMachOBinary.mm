@@ -4,6 +4,7 @@
 
 #import "MISMachOBinary.h"
 #import "MISSegment.h"
+#import "MISVariant.h"
 
 using namespace macho_insight;
 
@@ -43,6 +44,19 @@ using namespace macho_insight;
         return 0;
     }
     return _cxxObject->SegmentCount();
+}
+
+- (NSArray<MISVariant *> *)dumpedLoadCommands {
+    if (!_cxxObject) {
+        return nil;
+    }
+    const auto &loadCommands = _cxxObject->DumpedLoadCommands();
+    NSMutableArray *result = [NSMutableArray arrayWithCapacity:loadCommands.size()];
+    for (auto loadCommand : loadCommands) {
+        MISVariant *variant = [[MISVariant alloc] initWithCxxObject:(void **) &loadCommand];
+        [result addObject:variant];
+    }
+    return [result copy];
 }
 
 - (MISLoadDylib *)loadDylibAtIndex:(NSUInteger)index {

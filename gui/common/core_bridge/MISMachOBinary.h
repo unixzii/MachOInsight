@@ -4,6 +4,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class MISLoader;
 @class MISSegment;
+@class MISVariant;
 
 @interface MISLoadDylib : NSObject
 
@@ -17,6 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, readonly, assign) NSUInteger numberOfLoadDylibs;
 @property (nonatomic, readonly, assign) NSUInteger numberOfSegments;
+@property (nonatomic, readonly, copy) NSArray<MISVariant *> *dumpedLoadCommands;
 
 + (instancetype)new NS_UNAVAILABLE;
 - (instancetype)init NS_UNAVAILABLE;
