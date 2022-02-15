@@ -173,6 +173,9 @@ void MachOBinary::ParseLoadCommands() {
   parsing_context.RegisterParser(
       SegmentLoadCommandParser([this](segment_command_64* lc) {
         this->segments_.emplace_back(base::AddressSpace(lc));
+
+        this->AddDumpedLoadCommand(
+            LoadCommandDumpHelper(this->mapped_file_->Start()).DumpSegment(lc));
       }));
   parsing_context.RegisterParser(
       ChainedFixupsLoadCommandParser([this](linkedit_data_command* lc) {
