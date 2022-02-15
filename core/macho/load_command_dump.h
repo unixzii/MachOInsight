@@ -20,8 +20,14 @@ struct LoadCommandDumpHelper {
     fields.push_back(MakeField("Command", &lc->cmd, "LC_SEGMENT_64"));
     fields.push_back(MakeField("Command Size", &lc->cmdsize, lc->cmdsize));
     fields.push_back(MakeField("Segment Name", &lc->segname, lc->segname));
-    fields.push_back(MakeField("VM Address", &lc->vmaddr, lc->vmaddr));
-    fields.push_back(MakeField("VM Size", &lc->vmsize, lc->vmsize));
+    fields.push_back(
+        MakeField("VM Address", &lc->vmaddr, (unsigned long long) lc->vmaddr));
+    fields.push_back(
+        MakeField("VM Size", &lc->vmsize, (unsigned long long) lc->vmsize));
+    fields.push_back(MakeField("File Offset", &lc->fileoff,
+                               (unsigned long long) lc->fileoff));
+    fields.push_back(MakeField("File Size", &lc->filesize,
+                               (unsigned long long) lc->filesize));
     fields.push_back(
         MakeField("Maximum VM Protection", &lc->maxprot, lc->maxprot));
     fields.push_back(
@@ -41,8 +47,10 @@ struct LoadCommandDumpHelper {
       child_root["name"] = std::string("Section (") + sect->sectname + ")";
 
       std::vector<base::Variant> fields;
-      fields.push_back(MakeField("Address", &sect->addr, sect->addr));
-      fields.push_back(MakeField("Size", &sect->size, sect->size));
+      fields.push_back(
+          MakeField("Address", &sect->addr, (unsigned long long) sect->addr));
+      fields.push_back(
+          MakeField("Size", &sect->size, (unsigned long long) sect->size));
       fields.push_back(MakeField("File Offset", &sect->offset, sect->offset));
       fields.push_back(MakeField("Alignment", &sect->align, sect->align));
       fields.push_back(
