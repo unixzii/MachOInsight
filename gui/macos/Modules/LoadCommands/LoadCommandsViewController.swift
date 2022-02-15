@@ -1,29 +1,47 @@
 import Cocoa
 import MachOInsightCommon
 
-fileprivate class _SidebarDataTableSource: PlainDataTableSource {
+fileprivate class _SidebarDataTableSource: DataTableSource {
     
     let items: [MISVariant]
     
     private var titleCache = [ObjectIdentifier : String]()
+    private var childCache = [ObjectIdentifier : [MISVariant]]()
     
     init(items: [MISVariant]) {
         self.items = items
     }
     
-    override var columns: [String] {
+    var columns: [String] {
         return ["Name"]
     }
     
-    override var numberOfRows: Int {
+    var numberOfRows: Int {
         return items.count
     }
     
-    override func item(at index: Int) -> Any {
+    func item(at index: Int) -> Any {
         return items[index]
     }
     
-    override func displayContent(for item: Any, column: Int) -> DataTableDisplayContent {
+    func numberOfChildren(of item: Any) -> Int {
+        let variant = item as! MISVariant
+        let id = ObjectIdentifier(variant)
+        if let children = childCache[id] {
+            return children.count
+        }
+        if let children = variant.toDictionary()?["children"]?.toArray() {
+            childCache[id] = children
+            return children.count
+        }
+        return 0
+    }
+    
+    func child(at index: Int, ofItem item: Any) -> Any {
+        return childCache[ObjectIdentifier(item as AnyObject)]![index]
+    }
+    
+    func displayContent(for item: Any, column: Int) -> DataTableDisplayContent {
         let title: String = {
             let id = ObjectIdentifier(item as AnyObject)
             if let title = titleCache[id] {
