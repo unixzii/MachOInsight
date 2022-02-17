@@ -135,6 +135,42 @@ struct LoadCommandDumpHelper {
     return builder.Build();
   }
 
+  base::Variant DumpDyldInfo(dyld_info_command* lc) const {
+    detail::LCDumpTreeBuilder builder("LC_DYLD_INFO_ONLY", base_);
+
+    builder.AddField("Command", &lc->cmd, "LC_DYLD_INFO_ONLY");
+    builder.AddField("Command Size", &lc->cmdsize, lc->cmdsize);
+    builder.AddField("Rebase Info Offset", &lc->rebase_off, lc->rebase_off);
+    builder.AddField("Rebase Info Size", &lc->rebase_size, lc->rebase_size);
+    builder.AddField("Binding Info Offset", &lc->bind_off, lc->bind_off);
+    builder.AddField("Binding Info Size", &lc->bind_size, lc->bind_size);
+    builder.AddField("Weak Binding Info Offset", &lc->weak_bind_off,
+                     lc->weak_bind_off);
+    builder.AddField("Weak Binding Size", &lc->weak_bind_size,
+                     lc->weak_bind_size);
+    builder.AddField("Lazy Binding Info Offset", &lc->lazy_bind_off,
+                     lc->lazy_bind_off);
+    builder.AddField("Lazy Binding Info Size", &lc->lazy_bind_size,
+                     lc->lazy_bind_size);
+    builder.AddField("Export Info Offset", &lc->export_off, lc->export_off);
+    builder.AddField("Export Info Size", &lc->export_size, lc->export_size);
+
+    return builder.Build();
+  }
+
+  base::Variant DumpRunpath(rpath_command* lc) const {
+    detail::LCDumpTreeBuilder builder("LC_RPATH", base_);
+
+    std::string path = ((const char*) lc) + lc->path.offset;
+
+    builder.AddField("Command", &lc->cmd, "LC_RPATH");
+    builder.AddField("Command Size", &lc->cmdsize, lc->cmdsize);
+    builder.AddField("Str Offset", &lc->path.offset, lc->path.offset);
+    builder.AddField("Path", ((const char*) lc) + lc->path.offset, path, true);
+
+    return builder.Build();
+  }
+
  private:
   base::AddressSpace base_;
 };

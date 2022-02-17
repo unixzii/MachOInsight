@@ -30,8 +30,12 @@ struct mach_header_64 {
   uint32_t reserved;    /* reserved */
 };
 
+constexpr static uint32_t LC_REQ_DYLD = 0x80000000;
+
 constexpr static uint32_t LC_LOAD_DYLIB = 0xc;
 constexpr static uint32_t LC_SEGMENT_64 = 0x19;
+constexpr static uint32_t LC_DYLD_INFO_ONLY = 0x22 | LC_REQ_DYLD;
+constexpr static uint32_t LC_RPATH = 0x1c | LC_REQ_DYLD;
 
 constexpr static uint32_t LC_DYLD_CHAINED_FIXUPS = 0x80000034;
 
@@ -90,6 +94,21 @@ struct section_64 { /* for 64-bit architectures */
   uint32_t reserved3;  /* reserved */
 };
 
+struct dyld_info_command {
+  uint32_t cmd;             /* LC_DYLD_INFO or LC_DYLD_INFO_ONLY */
+  uint32_t cmdsize;         /* sizeof(struct dyld_info_command) */
+  uint32_t rebase_off;      /* file offset to rebase info  */
+  uint32_t rebase_size;     /* size of rebase info   */
+  uint32_t bind_off;        /* file offset to binding info   */
+  uint32_t bind_size;       /* size of binding info  */
+  uint32_t weak_bind_off;   /* file offset to weak binding info   */
+  uint32_t weak_bind_size;  /* size of weak binding info  */
+  uint32_t lazy_bind_off;   /* file offset to lazy binding info */
+  uint32_t lazy_bind_size;  /* size of lazy binding infs */
+  uint32_t export_off;      /* file offset to lazy binding info */
+  uint32_t export_size;     /* size of lazy binding infs */
+};
+
 struct linkedit_data_command {
   uint32_t cmd;       /* LC_CODE_SIGNATURE, LC_SEGMENT_SPLIT_INFO,
                          LC_FUNCTION_STARTS, LC_DATA_IN_CODE,
@@ -133,6 +152,12 @@ enum {
   DYLD_CHAINED_PTR_START_NONE   = 0xFFFF, // used in page_start[] to denote a page with no fixups
   DYLD_CHAINED_PTR_START_MULTI  = 0x8000, // used in page_start[] to denote a page which has multiple starts
   DYLD_CHAINED_PTR_START_LAST   = 0x8000, // used in chain_starts[] to denote last start in list for page
+};
+
+struct rpath_command {
+  uint32_t cmd;       /* LC_RPATH */
+  uint32_t cmdsize;   /* includes string */
+  union lc_str path;  /* path to add to run path */
 };
 
 }  // macho namespace

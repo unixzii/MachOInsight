@@ -65,6 +65,10 @@ using SegmentLoadCommandParser =
     detail::LoadCommandParser<segment_command_64, LC_SEGMENT_64>;
 using ChainedFixupsLoadCommandParser =
     detail::LoadCommandParser<linkedit_data_command, LC_DYLD_CHAINED_FIXUPS>;
+using DyldInfoLoadCommandParser =
+    detail::LoadCommandParser<dyld_info_command, LC_DYLD_INFO_ONLY>;
+using RunpathLoadCommandParser =
+    detail::LoadCommandParser<rpath_command, LC_RPATH>;
 
 bool MachOBinary::IsValid() const {
   auto header = base_.As<mach_header_64>();
@@ -172,6 +176,12 @@ void MachOBinary::ParseLoadCommands() {
             LoadCommandDumpHelper(this->mapped_file_->Start()).DumpSegment(lc));
       }));
   parsing_context.RegisterParser(
+      DyldInfoLoadCommandParser([this](dyld_info_command* lc) {
+        this->AddDumpedLoadCommand(
+            LoadCommandDumpHelper(this->mapped_file_->Start())
+                .DumpDyldInfo(lc));
+      }));
+  parsing_context.RegisterParser(
       ChainedFixupsLoadCommandParser([this](linkedit_data_command* lc) {
         this->use_chained_fixups_ = true;
 
@@ -182,6 +192,11 @@ void MachOBinary::ParseLoadCommands() {
         this->lc_partially_parsed_allowed_ = true;
         helper.Parse();
         this->lc_partially_parsed_allowed_ = false;
+      }));
+  parsing_context.RegisterParser(
+      RunpathLoadCommandParser([this](rpath_command* lc) {
+        this->AddDumpedLoadCommand(
+            LoadCommandDumpHelper(this->mapped_file_->Start()).DumpRunpath(lc));
       }));
 
   auto header = base_.As<mach_header_64>();
