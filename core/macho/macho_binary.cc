@@ -9,9 +9,8 @@
 #include "core/platform/byte_order.h"
 #include "core/utils/logger.h"
 
-namespace {
-
-using namespace macho_insight::macho;
+namespace macho_insight {
+namespace macho {
 
 namespace detail {
 
@@ -66,11 +65,6 @@ using SegmentLoadCommandParser =
     detail::LoadCommandParser<segment_command_64, LC_SEGMENT_64>;
 using ChainedFixupsLoadCommandParser =
     detail::LoadCommandParser<linkedit_data_command, LC_DYLD_CHAINED_FIXUPS>;
-
-}  // anonymous namespace
-
-namespace macho_insight {
-namespace macho {
 
 bool MachOBinary::IsValid() const {
   auto header = base_.As<mach_header_64>();
